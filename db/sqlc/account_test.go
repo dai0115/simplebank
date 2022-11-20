@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/simplebank/db/util"
@@ -55,6 +56,10 @@ func TestListAccount(t *testing.T) {
 	accounts, err := testQueries.ListAccount(context.Background(), args)
 	require.NoError(t, err)
 	require.EqualValues(t, len(accounts), args.Limit)
+
+	for _, account := range accounts {
+		require.NotEmpty(t, account)
+	}
 }
 
 func TestUpdateAccount(t *testing.T) {
@@ -63,12 +68,22 @@ func TestUpdateAccount(t *testing.T) {
 		ID:      account.ID,
 		Balance: 10000, // original balance must be between 0〜1000. so this must be different
 	}
-	err := testQueries.UpdateAccount(context.Background(), args)
-	require.NoError(t, err)
-
-	updatedAccount, err := testQueries.GetAccount(context.Background(), account.ID)
+	updatedAccount, err := testQueries.UpdateAccount(context.Background(), args)
 	require.NoError(t, err)
 	require.Equal(t, account.ID, updatedAccount.ID)
-
 	require.NotEqual(t, account.Balance, updatedAccount.Balance)
+}
+
+func TestDeleteAccount(t *testing.T) {
+	account := createRandomAccount(t)
+	id := account.ID
+	err := testQueries.DeleteAccount(context.Background(), id)
+	require.NoError(t, err)
+
+	// check if deleted
+	deletedAccount, err := testQueries.GetAccount(context.Background(), account.ID)
+	require.Error(t, err)
+	require.EqualError(t, err, sql.ErrNoRows.Error())
+	require.Empty(t, deletedAccount)
+
 }
