@@ -49,8 +49,13 @@ func TestGetAccount(t *testing.T) {
 }
 
 func TestListAccount(t *testing.T) {
+	const n = 10
+	for i := 0; i < n; i++ {
+		createRandomAccount(t)
+	}
+
 	args := ListAccountParams{
-		Limit:  10,
+		Limit:  n,
 		Offset: 0,
 	}
 	accounts, err := testQueries.ListAccount(context.Background(), args)
