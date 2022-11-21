@@ -1,0 +1,26 @@
+# just name of this workflow
+name: ci-test
+
+# event triger to start jobs
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  # name of job(only "build" in this case)
+  test:
+    # runner environment
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+
+    - name: Test
+      run: make test
