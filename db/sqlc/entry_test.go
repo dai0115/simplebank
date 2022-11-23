@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/simplebank/db/util"
+	"github.com/simplebank/util"
 	"github.com/stretchr/testify/require"
 )
 
