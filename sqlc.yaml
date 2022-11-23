@@ -10,4 +10,4 @@ packages:
     emit_interface: false
     emit_exact_table_names: false
     # accounts table -> Account struct
-    emit_empty_slices: false
+    emit_empty_slices: true
