@@ -31,7 +31,7 @@ func TestGetAccount(t *testing.T) {
 			accountID: account.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
+					GetAccount(gomock.Any(), account.ID).
 					Times(1).
 					Return(account, nil)
 			},
@@ -104,6 +104,71 @@ func TestGetAccount(t *testing.T) {
 
 }
 
+func TestListAccount(t *testing.T) {
+	limit := util.RandomInt(1, 5)
+	offset := util.RandomInt(1, 5)
+	accounts := createRandomAccounts(limit)
+	args := db.ListAccountParams{
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	}
+
+	testCases := []struct {
+		name          string
+		PageID        int
+		PageSize      int
+		buildStubs    func(store *mockdb.MockStore)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name:     "OK",
+			PageID:   int(limit),
+			PageSize: int(offset),
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					ListAccount(gomock.Any(), args).
+					Return(accounts, nil)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+	}
+
+	// start test
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			store := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(store)
+
+			// start test server and send request
+			server := NewServer(store)
+			recorder := httptest.NewRecorder()
+			url := fmt.Sprintf("/accounts?page_id=%d&page_size=%d", tc.PageID, tc.PageSize)
+
+			request, err := http.NewRequest(http.MethodGet, url, nil)
+			require.NoError(t, err)
+
+			server.router.ServeHTTP(recorder, request)
+			tc.checkResponse(t, recorder)
+		})
+	}
+}
+
+// returns list of random accounts
+func createRandomAccounts(num int64) []db.Account {
+	var accounts []db.Account
+	for i := 0; i < int(num); i++ {
+		account := randomAccount()
+		accounts = append(accounts, account)
+	}
+	return accounts
+}
+
+// returns single random account
 func randomAccount() db.Account {
 	return db.Account{
 		ID:       util.RandomInt(1, 1000),
