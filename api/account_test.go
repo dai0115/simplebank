@@ -229,7 +229,7 @@ func TestCreateAccount(t *testing.T) {
 			Currency:  account.Currency,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					CreateAccount(gomock.Any(), args).
+					CreateAccount(gomock.Any(), gomock.Eq(args)).
 					Times(1).
 					Return(account, nil)
 			},
@@ -259,7 +259,7 @@ func TestCreateAccount(t *testing.T) {
 			Currency:  account.Currency,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					CreateAccount(gomock.Any(), args).
+					CreateAccount(gomock.Any(), gomock.Eq(args)).
 					Times(1).
 					Return(db.Account{}, sql.ErrConnDone)
 			},
