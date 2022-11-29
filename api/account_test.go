@@ -208,12 +208,6 @@ func TestCreateAccount(t *testing.T) {
 		Currency: util.RandomCurrency(),
 	}
 
-	args := db.CreateAccountParams{
-		Owner:    account.Owner,
-		Balance:  account.Balance,
-		Currency: account.Currency,
-	}
-
 	testCases := []struct {
 		name          string
 		accountID     int64
@@ -228,6 +222,12 @@ func TestCreateAccount(t *testing.T) {
 			Owner:     account.Owner,
 			Currency:  account.Currency,
 			buildStubs: func(store *mockdb.MockStore) {
+				args := db.CreateAccountParams{
+					Owner:    account.Owner,
+					Balance:  account.Balance,
+					Currency: account.Currency,
+				}
+
 				store.EXPECT().
 					CreateAccount(gomock.Any(), gomock.Eq(args)).
 					Times(1).
@@ -244,6 +244,11 @@ func TestCreateAccount(t *testing.T) {
 			//Owner:     account.Owner,
 			//Currency: account.Currency,
 			buildStubs: func(store *mockdb.MockStore) {
+				args := db.CreateAccountParams{
+					Owner:    account.Owner,
+					Balance:  account.Balance,
+					Currency: account.Currency,
+				}
 				store.EXPECT().
 					CreateAccount(gomock.Any(), args).
 					Times(0)
@@ -259,7 +264,7 @@ func TestCreateAccount(t *testing.T) {
 			Currency:  account.Currency,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					CreateAccount(gomock.Any(), gomock.Eq(args)).
+					CreateAccount(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(db.Account{}, sql.ErrConnDone)
 			},
